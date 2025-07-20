@@ -1,0 +1,61 @@
+# Fashion Suggestion Backend Requirements
+
+# Core Web Framework
+Flask==3.1.0
+Flask-RESTful==0.3.10
+Flask-CORS==6.0.1
+Werkzeug>=3.1
+
+# Computer Vision & Machine Learning
+ultralytics==8.3.168          # YOLOv11 object detection
+torch==2.7.1                  # PyTorch deep learning framework
+torchvision==0.22.1           # Computer vision for PyTorch
+opencv-python==4.12.0.88      # OpenCV for image processing
+Pillow==11.3.0                 # Image processing library
+numpy==2.2.6                   # Numerical computing
+
+# NLP & Embeddings
+transformers==4.53.2           # Hugging Face transformers (CLIP)
+tokenizers==0.21.2             # Fast tokenizers
+safetensors==0.5.3             # Safe tensor serialization
+
+# Vector Database
+qdrant-client==1.15.0          # Qdrant vector database client
+grpcio==1.73.1                 # gRPC for Qdrant
+
+# Object Storage
+boto3==1.39.9                  # AWS SDK for MinIO S3
+botocore==1.39.9               # Low-level AWS SDK
+
+# Data Processing
+pandas==2.3.1                  # Data manipulation
+scipy==1.16.0                  # Scientific computing
+matplotlib==3.10.3             # Plotting library
+
+# HTTP & API
+httpx==0.28.1                  # Modern HTTP client
+requests==2.32.4               # HTTP library
+urllib3==2.5.0                 # HTTP client
+
+# Configuration & Environment
+python-dotenv==1.1.1           # Environment variables from .env
+PyYAML==6.0.2                  # YAML parser
+
+# Data Validation
+pydantic==2.11.7               # Data validation using Python type hints
+
+# Utilities
+tqdm==4.67.1                   # Progress bars
+psutil==7.0.0                  # System and process utilities
+python-dateutil==2.9.0.post0  # Date/time utilities
+
+# Development & Testing (optional)
+pytest>=7.0.0                  # Testing framework
+pytest-cov>=4.0.0              # Coverage plugin for pytest
+black>=23.0.0                  # Code formatter
+flake8>=6.0.0                  # Code linter
+pre-commit>=3.0.0              # Pre-commit hooks
+
+# Production Server (optional)
+gunicorn>=21.0.0                # WSGI HTTP Server
+waitress>=2.1.0                # Pure Python WSGI server

@@ -1,0 +1,952 @@
+{% extends "base.html" %}
+
+{% block title %}Fashion AI - Analiz Sonuçları{% endblock %}
+
+{% block content %}
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay">
+    <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <h4>Sonuçlar Hazırlanıyor...</h4>
+        <p>AI analizi tamamlanıyor ve sonuçlar getiriliyor</p>
+    </div>
+</div>
+
+<!-- Results Hero Section -->
+<div class="results-hero">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="results-header glass-card">
+                    <div class="row g-4 align-items-center">
+                        <div class="col-auto">
+                            <div class="results-icon">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <h1 class="results-title">Analiz Tamamlandı!</h1>
+                            <p class="results-subtitle">
+                                AI modelimiz görselinizi analiz etti ve benzer ürünler buldu.
+                            </p>
+                        </div>
+                        <div class="col-auto">
+                            <a href="/" class="btn-new-analysis">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                Yeni Analiz
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Results Section -->
+<div class="results-main">
+    <div class="container">
+        <div class="row">
+            <!-- Original Image Panel -->
+            <div class="col-lg-4">
+                <div class="original-image-panel glass-card">
+                    <div class="panel-header">
+                        <h3 class="panel-title">
+                            <i class="bi bi-image me-2"></i>
+                            Yüklenen Görsel
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="original-image-container">
+                            <div class="image-thumbnail-wrapper">
+                                <img id="original-image" alt="Yüklenen görsel" class="original-image">
+                            </div>
+                            <div class="image-info">
+                                <div class="info-item">
+                                    <span class="info-label">Dosya:</span>
+                                    <span id="file-name" class="info-value">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Tarih:</span>
+                                    <span id="upload-date" class="info-value">-</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Durum:</span>
+                                    <span class="info-value status-success">
+                                        <i class="bi bi-check-circle-fill me-1"></i>
+                                        Başarılı
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detection Summary -->
+                        <div id="detection-summary" class="detection-summary">
+                            <h5 class="summary-title">Tespit Özeti</h5>
+                            <div id="detected-objects" class="detected-objects">
+                                <!-- Will be populated by JS -->
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="panel-actions">
+                            <button class="btn-action btn-secondary" onclick="window.history.back()">
+                                <i class="bi bi-arrow-left me-2"></i>
+                                Geri Dön
+                            </button>
+                            <button class="btn-action btn-primary" onclick="location.reload()">
+                                <i class="bi bi-arrow-clockwise me-2"></i>
+                                Yenile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Panel -->
+            <div class="col-lg-8">
+                <div class="results-panel">
+                    <!-- Results Header -->
+                    <div class="results-panel-header glass-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="panel-title">
+                                    <i class="bi bi-stars me-2"></i>
+                                    Benzer Ürün Önerileri
+                                </h3>
+                                <p class="panel-subtitle">Yapay zeka ile bulunan benzer ürünler</p>
+                            </div>
+                            <div class="results-stats">
+                                <span id="total-suggestions" class="stat-number">0</span>
+                                <span class="stat-label">Öneri</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Content -->
+                    <div id="results-content" class="results-content">
+                        <!-- Will be populated by JS -->
+                    </div>
+
+                    <!-- No Results State -->
+                    <div id="no-results" class="no-results glass-card d-none">
+                        <div class="no-results-content">
+                            <div class="no-results-icon">
+                                <i class="bi bi-search"></i>
+                            </div>
+                            <h4>Henüz Sonuç Bulunamadı</h4>
+                            <p>Analiz devam ediyor veya bu görsel için benzer ürün bulunamadı.</p>
+                            <button class="btn-primary" onclick="location.reload()">
+                                <i class="bi bi-arrow-clockwise me-2"></i>
+                                Tekrar Dene
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- History Section -->
+<div class="history-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="history-panel glass-card">
+                    <div class="panel-header">
+                        <h3 class="panel-title">
+                            <i class="bi bi-clock-history me-2"></i>
+                            Son Analizler
+                        </h3>
+                        <button class="btn-clear-history" onclick="clearHistory()">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                    </div>
+                    <div class="panel-body">
+                        <div id="history-content" class="history-grid">
+                            <!-- Will be populated by JS -->
+                        </div>
+                        <div id="no-history" class="no-history d-none">
+                            <i class="bi bi-clock-history"></i>
+                            <p>Henüz analiz geçmişi bulunmuyor.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Görsel Detayı</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <img id="modal-image" class="img-fluid rounded" alt="Detay görsel">
+                <div class="modal-image-info mt-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Kategori:</strong> <span id="modal-category">-</span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Benzerlik:</strong> <span id="modal-similarity">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+/* Results Page Specific Styles */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(249, 250, 251, 0.95);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.loading-content {
+    text-align: center;
+    max-width: 400px;
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid var(--gray-200);
+    border-top: 4px solid var(--primary);
+    border-radius: 50%;
+    margin: 0 auto 2rem;
+    animation: spin 1s linear infinite;
+}
+
+.results-hero {
+    padding: 2rem 0;
+}
+
+.results-header {
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.results-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.results-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 0.5rem;
+}
+
+.results-subtitle {
+    color: var(--gray-600);
+    margin: 0;
+}
+
+.btn-new-analysis {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-lg);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: var(--shadow-md);
+}
+
+.btn-new-analysis:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    color: white;
+}
+
+.results-main {
+    padding: 0 0 3rem;
+}
+
+.original-image-panel,
+.results-panel-header {
+    margin-bottom: 2rem;
+}
+
+.panel-header {
+    border-bottom: 1px solid var(--gray-200);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+}
+
+.panel-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.panel-subtitle {
+    color: var(--gray-600);
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.panel-body {
+    padding: 2rem;
+}
+
+.original-image-container {
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.image-thumbnail-wrapper {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+}
+
+.original-image {
+    max-width: 100%;
+    max-height: 180px;
+    border-radius: var(--radius-md);
+    object-fit: contain;
+    box-shadow: var(--shadow-sm);
+}
+
+.image-info {
+    margin-top: 1rem;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--gray-100);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 500;
+    color: var(--gray-600);
+}
+
+.info-value {
+    color: var(--gray-900);
+    font-weight: 500;
+}
+
+.status-success {
+    color: var(--success) !important;
+}
+
+.detection-summary {
+    background: var(--gray-50);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.summary-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: 1rem;
+}
+
+.detected-objects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.detected-object-badge {
+    background: var(--primary);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.panel-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-action {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-lg);
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.results-stats {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+}
+
+.results-content {
+    display: grid;
+    gap: 2rem;
+}
+
+.result-item {
+    background: white;
+    border-radius: var(--radius-xl);
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--gray-200);
+    transition: all 0.3s ease;
+}
+
+.result-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.result-header {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.result-object-type {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-lg);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.result-confidence {
+    font-size: 0.875rem;
+    color: var(--gray-600);
+}
+
+.similar-products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.product-card {
+    background: var(--gray-50);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+}
+
+.product-card:hover {
+    transform: scale(1.05);
+    border-color: var(--primary);
+    background: white;
+    box-shadow: var(--shadow-md);
+}
+
+.product-image {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    margin-bottom: 0.75rem;
+}
+
+.product-similarity {
+    background: var(--success);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.no-results {
+    padding: 3rem;
+    text-align: center;
+}
+
+.no-results-content {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.no-results-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--gray-100);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: var(--gray-400);
+    margin: 0 auto 1.5rem;
+}
+
+.history-section {
+    padding: 2rem 0;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.history-panel {
+    padding: 2rem;
+}
+
+.btn-clear-history {
+    background: none;
+    border: none;
+    color: var(--gray-400);
+    padding: 0.5rem;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-clear-history:hover {
+    color: var(--error);
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.history-item {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    border: 1px solid var(--gray-200);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.history-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.history-image {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+    margin-bottom: 0.75rem;
+}
+
+.history-title {
+    font-weight: 600;
+    color: var(--gray-900);
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.history-date {
+    font-size: 0.75rem;
+    color: var(--gray-500);
+    margin-bottom: 0.5rem;
+}
+
+.history-stats {
+    font-size: 0.75rem;
+    color: var(--gray-600);
+}
+
+.no-history {
+    text-align: center;
+    color: var(--gray-500);
+    padding: 2rem;
+}
+
+.no-history i {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .results-header {
+        padding: 1.5rem;
+    }
+    
+    .results-header .row {
+        text-align: center;
+    }
+    
+    .results-header .col-auto {
+        margin-top: 1rem;
+    }
+    
+    .panel-body {
+        padding: 1.5rem;
+    }
+    
+    .similar-products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
+    
+    .history-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+    
+    .panel-actions {
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+class ResultsPage {
+    constructor() {
+        this.fileId = null;
+        this.loadingOverlay = document.getElementById('loading-overlay');
+        this.init();
+    }
+
+    init() {
+        // Get file_id from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        this.fileId = urlParams.get('file_id');
+
+        if (this.fileId) {
+            this.loadResults();
+        } else {
+            this.hideLoading();
+            this.showNoResults();
+        }
+
+        this.loadHistory();
+    }
+
+    async loadResults() {
+        try {
+            // Simulate loading time for better UX
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            const response = await fetch(`/api/result/${this.fileId}`);
+            const data = await response.json();
+
+            this.hideLoading();
+
+            if (data.error) {
+                this.showError(data.error);
+            } else {
+                this.displayResults(data);
+            }
+        } catch (error) {
+            console.error('Error loading results:', error);
+            this.hideLoading();
+            this.showError('Sonuçlar yüklenirken hata oluştu.');
+        }
+    }
+
+    async loadHistory() {
+        try {
+            const response = await fetch('/api/results/history');
+            const data = await response.json();
+            this.displayHistory(data.history || []);
+        } catch (error) {
+            console.error('Error loading history:', error);
+        }
+    }
+
+    hideLoading() {
+        if (this.loadingOverlay) {
+            this.loadingOverlay.style.display = 'none';
+        }
+    }
+
+    displayResults(data) {
+        // Display original image
+        this.displayOriginalImage(data);
+        
+        // Display detection summary
+        this.displayDetectionSummary(data);
+        
+        // Display similar products
+        this.displaySimilarProducts(data.suggestions || []);
+    }
+
+    displayOriginalImage(data) {
+        const originalImage = document.getElementById('original-image');
+        const fileName = document.getElementById('file-name');
+        const uploadDate = document.getElementById('upload-date');
+
+        // Set image source - use correct backend image proxy format
+        if (originalImage) {
+            let imageUrl;
+            
+            // Try different possible URL formats from backend
+            if (data.original_image_url) {
+                imageUrl = data.original_image_url;
+            } else if (data.image_url) {
+                imageUrl = data.image_url;
+            } else if (data.file_url) {
+                imageUrl = data.file_url;
+            } else if (data.s3_key && data.bucket_name) {
+                // Construct URL using MinIO proxy format
+                imageUrl = `/api/image-proxy/${data.bucket_name}/${data.s3_key}`;
+            } else if (data.s3_key) {
+                // Default to user-uploads bucket
+                imageUrl = `/api/image-proxy/user-uploads/${data.s3_key}`;
+            } else {
+                // Fallback - try with file_id
+                imageUrl = `/api/image-proxy/user-uploads/${this.fileId}.jpg`;
+            }
+            
+            console.log('Setting image URL:', imageUrl);
+            originalImage.src = imageUrl;
+            originalImage.style.display = 'block';
+            
+            // Add error handler for broken images
+            originalImage.onerror = function() {
+                console.error('Failed to load image:', imageUrl);
+                this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE4MCIgdmlld0JveD0iMCAwIDIwMCAxODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIxODAiIGZpbGw9IiNGM0Y0RjYiLz48cGF0aCBkPSJNNzAgNzBINzBWMTEwSDEzMFY3MEg3MFoiIHN0cm9rZT0iIzlDQTNBRiIgc3Ryb2tlLXdpZHRoPSIyIi8+PHRleHQgeD0iMTAwIiB5PSIxNDAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzlDQTNBRiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+R8O2cnNlbCBZw7xrbGVuZW1lZGk8L3RleHQ+PC9zdmc+';
+                this.style.maxHeight = '120px';
+            };
+        }
+
+        // Set filename
+        if (fileName) {
+            fileName.textContent = data.filename || data.file_name || `Dosya-${this.fileId}`;
+        }
+
+        // Set upload date
+        if (uploadDate) {
+            const date = data.timestamp || data.upload_date || new Date().toISOString();
+            uploadDate.textContent = new Date(date).toLocaleString('tr-TR');
+        }
+    }
+
+    displayDetectionSummary(data) {
+        const detectedObjects = document.getElementById('detected-objects');
+        
+        if (detectedObjects && data.suggestions) {
+            detectedObjects.innerHTML = '';
+            
+            data.suggestions.forEach(suggestion => {
+                const badge = document.createElement('div');
+                badge.className = 'detected-object-badge';
+                badge.innerHTML = `
+                    <i class="bi bi-check-circle-fill"></i>
+                    ${suggestion.object_type || suggestion.category}
+                `;
+                detectedObjects.appendChild(badge);
+            });
+        }
+    }
+
+    displaySimilarProducts(suggestions) {
+        const resultsContent = document.getElementById('results-content');
+        const totalSuggestions = document.getElementById('total-suggestions');
+        const noResults = document.getElementById('no-results');
+
+        if (suggestions.length === 0) {
+            resultsContent.style.display = 'none';
+            noResults.classList.remove('d-none');
+            return;
+        }
+
+        resultsContent.style.display = 'grid';
+        noResults.classList.add('d-none');
+
+        if (totalSuggestions) {
+            totalSuggestions.textContent = suggestions.reduce((total, suggestion) => 
+                total + (suggestion.similar_products || suggestion.products || []).length, 0
+            );
+        }
+
+        resultsContent.innerHTML = '';
+
+        suggestions.forEach((suggestion, index) => {
+            const resultItem = this.createResultItem(suggestion, index);
+            resultsContent.appendChild(resultItem);
+        });
+    }
+
+    createResultItem(suggestion, index) {
+        const resultItem = document.createElement('div');
+        resultItem.className = 'result-item fade-in';
+        resultItem.style.animationDelay = `${index * 0.1}s`;
+
+        const products = suggestion.similar_products || suggestion.products || [];
+        
+        resultItem.innerHTML = `
+            <div class="result-header">
+                <div class="result-object-type">
+                    <i class="bi bi-tag-fill"></i>
+                    ${suggestion.object_type || suggestion.category}
+                </div>
+                <div class="result-confidence">
+                    Tespit Güveni: ${((suggestion.detection_confidence || 0) * 100).toFixed(1)}%
+                </div>
+            </div>
+            <div class="similar-products-grid">
+                ${products.map(product => this.createProductCard(product)).join('')}
+            </div>
+        `;
+
+        return resultItem;
+    }
+
+    createProductCard(product) {
+        const similarity = ((product.similarity || 0) * 100).toFixed(1);
+        
+        return `
+            <div class="product-card" onclick="showImageModal('${product.image_url}', '${product.category || ''}', '${similarity}%')">
+                <img src="${product.image_url}" alt="Benzer ürün" class="product-image" 
+                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxMjAiIGZpbGw9IiNGM0Y0RjYiLz48cGF0aCBkPSJNNDAgNDBINDBWODBIODBWNDBINDBaIiBzdHJva2U9IiM5Q0EzQUYiIHN0cm9rZS13aWR0aD0iMiIvPjwvc3ZnPg=='">
+                <div class="product-similarity">${similarity}%</div>
+            </div>
+        `;
+    }
+
+    displayHistory(history) {
+        const historyContent = document.getElementById('history-content');
+        const noHistory = document.getElementById('no-history');
+
+        if (history.length === 0) {
+            historyContent.style.display = 'none';
+            noHistory.classList.remove('d-none');
+            return;
+        }
+
+        historyContent.style.display = 'grid';
+        noHistory.classList.add('d-none');
+
+        historyContent.innerHTML = '';
+
+        history.forEach(item => {
+            const historyItem = this.createHistoryItem(item);
+            historyContent.appendChild(historyItem);
+        });
+    }
+
+    createHistoryItem(item) {
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item';
+        historyItem.onclick = () => window.location.href = `/results?file_id=${item.file_id}`;
+
+        historyItem.innerHTML = `
+            <img src="${item.image_url || '/static/images/placeholder.jpg'}" alt="Analiz" class="history-image"
+                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDEwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiNGM0Y0RjYiLz48L3N2Zz4='">
+            <div class="history-title">${item.filename || 'Analiz'}</div>
+            <div class="history-date">${new Date(item.timestamp).toLocaleDateString('tr-TR')}</div>
+            <div class="history-stats">${item.suggestions_count || 0} öneri</div>
+        `;
+
+        return historyItem;
+    }
+
+    showError(message) {
+        const resultsContent = document.getElementById('results-content');
+        resultsContent.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                ${message}
+            </div>
+        `;
+    }
+
+    showNoResults() {
+        document.getElementById('no-results').classList.remove('d-none');
+    }
+}
+
+// Global functions
+function showImageModal(imageUrl, category, similarity) {
+    const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+    const modalImage = document.getElementById('modal-image');
+    const modalCategory = document.getElementById('modal-category');
+    const modalSimilarity = document.getElementById('modal-similarity');
+
+    modalImage.src = imageUrl;
+    modalCategory.textContent = category;
+    modalSimilarity.textContent = similarity;
+
+    modal.show();
+}
+
+function clearHistory() {
+    if (confirm('Tüm analiz geçmişini silmek istediğinizden emin misiniz?')) {
+        // Implement clear history functionality
+        console.log('Clearing history...');
+    }
+}
+
+// Initialize results page
+document.addEventListener('DOMContentLoaded', () => {
+    new ResultsPage();
+});
+</script>
+{% endblock %}
